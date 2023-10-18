@@ -11,7 +11,7 @@ import re
 import nltk.corpus 
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-from googletrans import Translator
+from googletrans import Translator # pip install googletrans==3.1.0a0
 from tqdm import tqdm
 
 # Importing the dataframe
@@ -42,15 +42,16 @@ stop = stopwords.words('english')
 stop.append('rt')
 
 def cleaning(text):
-    text = text.lower() # putting the text in lower
-    text = re.sub("\[.*?\]","",text)
+    text = text.lower() # putting the text in lowercase
+    text = re.sub("\[.*?\]","",text) # Remove text enclosed in square brackets
     text = re.sub(r"(@\[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", text)
-    text = " ".join([word for word in text.split() if word not in (stop)])
+    # remove @, non-alphanumeric chars, tabs, url, rt and http
+    text = " ".join([word for word in text.split() if word not in (stop)]) # remove stopwords
     return text
 
 df['text'] = df['text'].apply(lambda x: cleaning(x))
 
-df = df.drop_duplicates('clean_text')
+df = df.drop_duplicates('clean_text') # drop the duplicates
 df.reset_index(inplace=True, drop= True)
 
 
