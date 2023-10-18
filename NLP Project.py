@@ -32,7 +32,7 @@ def extract_tags(text:str)->dict():
     except: 
         d['hash_tags'] = []
     try:
-        d['links'] = re.findall(r'(https://t.co/\w+)|(http://t.co/\w+)',text)
+        d['links'] = re.findall(r'(https://t.co/\w+|http://t.co/\w+)',text)
         for link in d['links']:
             text = text.replace(link,'')
     except:
@@ -71,4 +71,4 @@ def clean_text_col(df):
 
 df_new = clean_text_col(df)
 
-df_new['links'][2995]
+df_new[['text_clean','links','hash_tags']]
