@@ -90,6 +90,7 @@ df = df.drop_duplicates('text') # drop the duplicates
 # Selecting only the columns that we interested in
 selected_columns = ['id', 'created_at', 'text', 'author.name', 'label', 'public_metrics.like_count', 'public_metrics.retweet_count', 'links', 'hash_tags']
 df = df.loc[:, selected_columns]
+df = df.reset_index(inplace = False)
 
 
 
