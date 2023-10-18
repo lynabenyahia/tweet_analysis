@@ -14,6 +14,7 @@ from nltk.corpus import stopwords
 from googletrans import Translator
 from tqdm import tqdm
 
+# Importing the dataframe
 df = pd.read_csv('data_tweet_sample_challenge.csv')  
   
 # =============================================================================
@@ -41,7 +42,7 @@ stop = stopwords.words('english')
 stop.append('rt')
 
 def cleaning(text):
-    text = text.lower()
+    text = text.lower() # putting the text in lower
     text = re.sub("\[.*?\]","",text)
     text = re.sub(r"(@\[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", text)
     text = " ".join([word for word in text.split() if word not in (stop)])
