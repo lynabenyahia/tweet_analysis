@@ -8,7 +8,12 @@ import pandas as pd
 import re 
 import numpy as np
 
-df = pd.read_csv("data_tweet_sample_challenge.csv")
+
+import os
+os.chdir('C:/Users/ziedk/OneDrive/Bureau/Strasbourg/Master data Strasbourg/Neural Network')
+
+
+df = pd.read_csv("clean_data_tweet_sample.csv")
 
 df['text'][2]
 
@@ -71,4 +76,4 @@ def clean_text_col(df):
 
 df_new = clean_text_col(df)
 
-df_new[['text_clean','links','hash_tags']]
+s = df_new[['text_clean','links','hash_tags']]
