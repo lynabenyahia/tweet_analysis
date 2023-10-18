@@ -12,6 +12,7 @@ import nltk.corpus
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from googletrans import Translator
+from tqdm import tqdm
 
 df = pd.read_csv('data_tweet_sample_challenge.csv')  
   
@@ -20,11 +21,18 @@ df = pd.read_csv('data_tweet_sample_challenge.csv')
 # =============================================================================
 tr = Translator()
 
+# Creating a progression bar
+progress_bar = tqdm(total=len(df), desc="Translation Progress")
+
 for i, row in df.iterrows():
     if row["label"] != "en":
         translated_text = tr.translate(row["text"], dest='en').text
         df.at[i, "text"] = translated_text
 
+    # Updating the progression bar
+    progress_bar.update(1)
+
+progress_bar.close()
 
 # =============================================================================
 # Cleaning the data
@@ -39,7 +47,7 @@ def cleaning(text):
     text = " ".join([word for word in text.split() if word not in (stop)])
     return text
 
-df['clean_text'] = df['text'].apply(lambda x: cleaning(x))
+df['text'] = df['text'].apply(lambda x: cleaning(x))
 
 df = df.drop_duplicates('clean_text')
 df.reset_index(inplace=True, drop= True)
