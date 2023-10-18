@@ -33,6 +33,9 @@ df['text'] = df['text'].apply(lambda x: cleaning(x))
 
 df = df.drop_duplicates('text') # drop the duplicates
 
+# Selecting only the columns that we interested in
+selected_columns = ['id', 'created_at', 'text', 'author.name', 'label', 'public_metrics.like_count', 'public_metrics.retweet_count']
+df = df.loc[:, selected_columns]
 
 
 
