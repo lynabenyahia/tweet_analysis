@@ -62,3 +62,72 @@ df_sentiment
 
 csv_file_path = 'sentiment_df.csv'
 df.to_csv(csv_file_path, index=False)
+
+
+
+
+# =============================================================================
+# Statistical Anaylsis : STATS
+# =============================================================================
+import os
+os.chdir('C:/Users/ziedk/OneDrive/Bureau/Strasbourg/Master data Strasbourg/Neural Network')
+
+import ast
+import pandas as pd 
+
+df = pd.read_csv('sentiment_df.csv')
+
+
+sent = list(df['sentiment'])
+
+
+sent = [ast.literal_eval(i)['label'] for i in sent]
+
+sent
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+
+
+
+unique_journals = df['author.name'].unique()
+
+cited_journals = list(df['author.name'])
+from collections import Counter
+
+
+# Count the occurrences of each element in the list
+element_counts = Counter(cited_journals)
+
+# Extract the 20 most common elements
+most_common_elements = element_counts.most_common(20)
+
+unique_journals = [i[0] for i in most_common_elements]
+
+
+
+
+
+df['sentiment_label'] = sent
+
+grouped_data = df.groupby(['author.name', 'sentiment_label']).size().reset_index(name='Count')
+
+
+for journal in unique_journals:
+    plt.figure(figsize=(10, 6))  # Set the figure size for each barplot
+    sns.barplot(data=grouped_data[grouped_data['author.name'] == journal],
+                x='sentiment_label', y='Count', palette='Set2')
+    plt.title(f'Sentiment Distribution for {journal}')
+    plt.xlabel('Sentiment')
+    plt.ylabel('Count')
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.show()
+
+
+
+
