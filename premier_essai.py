@@ -15,6 +15,8 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import warnings
+from tqdm import tqdm
+from transformers import pipeline
 
 warnings.filterwarnings("ignore")
 
@@ -361,3 +363,80 @@ fig.add_trace(
 
 fig.update_layout(height=600, width=800, title_text="Total number of retweets per author (top 5)")
 fig.show()
+
+
+
+# =============================================================================
+# Named Entity Recognition
+# =============================================================================
+
+tqdm.pandas()
+pipe = pipeline("token-classification", model="autoevaluate/entity-extraction")
+
+# Extract in the dict the keys and values that we interested in
+def extract_entity_info(entities):
+    return [{'entity': entity['entity'], 'score': entity['score'], 'word': entity['word']} for entity in entities]
+
+# Apply the function in the dataset
+df['Entity_recognition'] = df['text'].progress_apply(lambda x: extract_entity_info(pipe(x)))
+
+
+# Plot the 5 most frequent entities by type of entity
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Filter the entities : keep only 'LOC', 'ORG', et 'PER' and a score > 0.90
+filtered_entities = df[df['Entity_recognition'].apply(
+    lambda x: any(entity['entity'] in ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG'] and entity['score'] > 0.85 for entity in x)
+)]
+
+# Count the frequence by entities
+categories = {'LOC': [], 'ORG': []}
+word_count = {category: {} for category in categories}
+for entities in filtered_entities['Entity_recognition']:
+    for entity in entities:
+        entity_type = entity['entity']
+        if entity_type in ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG']:
+            category = entity_type[2:]  # Delete the B- and I-
+            word = entity['word']
+            if word not in word_count[category]:
+                word_count[category][word] = 1
+            else:
+                word_count[category][word] += 1
+                
+# Plot the 5 most frequent for the localisation
+cleaned_dict_loc = {key.lstrip('#'): value for key, value in word_count['LOC'].items()}
+
+# Data Filtering
+filtered_dict_loc = {key: value for key, value in cleaned_dict_loc.items() if len(key) > 3}
+sorted_dict_loc = dict(sorted(filtered_dict_loc.items(), key=lambda item: item[1], reverse=True)[:5])
+
+# Plot the 5 most frequent for the organisation
+cleaned_dict_org = {key.lstrip('#'): value for key, value in word_count['ORG'].items()}
+
+# Data Filtering
+filtered_dict_org = {key: value for key, value in cleaned_dict_org.items() if len(key) > 3}
+sorted_dict_org = dict(sorted(filtered_dict_org.items(), key=lambda item: item[1], reverse=True)[:5])
+
+# Create a new figure with subplots
+plt.figure(figsize=(12, 5))
+
+# Subplot for the Localisation
+plt.subplot(1, 2, 1)
+plt.bar(sorted_dict_loc.keys(), sorted_dict_loc.values())
+plt.xlabel('Words')
+plt.ylabel('Frequency')
+plt.title('Top 5 Localisation Words')
+
+# Subplot for the Organisation
+plt.subplot(1, 2, 2)
+plt.bar(sorted_dict_org.keys(), sorted_dict_org.values())
+plt.xlabel('Words')
+plt.ylabel('Frequency')
+plt.title('Top 5 Organisation Words')
+
+# Adjust layout
+plt.tight_layout()
+
+# Show the combined plot
+plt.show()
